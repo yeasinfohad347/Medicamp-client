@@ -1,37 +1,107 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { useContext, useState } from "react";
+import { Link, useNavigate, useLocation } from "react-router";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { FcGoogle } from "react-icons/fc";
+import Swal from "sweetalert2";
 import { toast } from "react-toastify";
-// import useAuth from "../hooks/useAuth"; // if using context auth
+import { AuthContext } from "../authentication/AuthContext";
+import useAxiosSecure from "../hooks/useAxiosSecure";
 
 const Register = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [showPassword, setShowPassword] = useState(false);
   const [imageName, setImageName] = useState("No file chosen");
 
-  // const { createUser, updateProfileInfo } = useAuth(); // optional custom hook
+  const { creatUser, updateUser, signInWithGoogle, setUser } =
+    useContext(AuthContext);
+
+  const axiosSecure = useAxiosSecure();
+
+  const saveUserToDB = async (user) => {
+    const userInfo = {
+      name: user.displayName,
+      email: user.email,
+      photoURL: user.photoURL,
+      role: "user", // default role
+    };
+
+    try {
+      await axiosSecure.put(`/users/${user.email}`, userInfo);
+    } catch (err) {
+      console.error("Failed to save user to DB:", err);
+    }
+  };
 
   const handleRegister = async (e) => {
     e.preventDefault();
     const form = e.target;
-
     const name = form.name.value;
     const email = form.email.value;
     const password = form.password.value;
     const image = form.image.files[0];
 
-    // Optional: upload image to ImgBB or Cloudinary and get the URL
+    const regex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}$/;
+
+    if (!regex.test(password)) {
+      toast.error(
+        "Password must include:\n• One uppercase letter\n• One lowercase letter\n• Minimum 6 characters",
+        { autoClose: 5000 }
+      );
+      return;
+    }
 
     try {
-      console.log("User Info:", { name, email, password, image });
-      // await createUser(email, password);
-      // await updateProfileInfo({ displayName: name, photoURL: imageURL });
-      toast.success("Account created successfully!");
-      navigate("/");
-    } catch (error) {
-      toast.error("Registration failed.");
-      console.error(error);
+      const result = await creatUser(email, password);
+      const photoUrl = image ? URL.createObjectURL(image) : "";
+
+      await updateUser({
+        displayName: name,
+        photoURL: photoUrl,
+      });
+
+      const updatedUser = {
+        ...result.user,
+        displayName: name,
+        photoURL: photoUrl,
+      };
+
+      setUser(updatedUser);
+
+      // ✅ Save to DB
+      await saveUserToDB(updatedUser);
+
+      Swal.fire({
+        title: "Congratulations!",
+        text: "You successfully registered!",
+        icon: "success",
+      });
+      navigate(location?.state?.from?.pathname || "/");
+    } catch (err) {
+      if (err.code === "auth/email-already-in-use") {
+        toast.error("This email is already registered.");
+      } else {
+        toast.error("Registration failed: " + err.message);
+        console.error(err);
+      }
     }
+  };
+
+  const handleGoogleSignIn = () => {
+    signInWithGoogle()
+      .then(async (result) => {
+        const loggedUser = result.user;
+
+        // 🔐 Save user to DB
+        await saveUserToDB(loggedUser);
+
+        toast.success("Logged in with Google!");
+        navigate(location?.state?.from?.pathname || "/");
+      })
+      .catch((err) => {
+        toast.error("Google Sign-In failed. Please try again.");
+        console.error(err);
+      });
   };
 
   return (
@@ -40,6 +110,7 @@ const Register = () => {
         <h2 className="text-3xl font-bold text-center mb-6 text-primary">
           Register for MediCamp
         </h2>
+
         <form onSubmit={handleRegister} className="space-y-4">
           <div>
             <label className="label font-medium">Full Name</label>
@@ -102,10 +173,19 @@ const Register = () => {
           </button>
         </form>
 
+        <div className="mt-4">
+          <button
+            onClick={handleGoogleSignIn}
+            className="btn btn-outline w-full flex items-center justify-center gap-2"
+          >
+            <FcGoogle size={20} /> Register with Google
+          </button>
+        </div>
+
         <p className="mt-4 text-sm text-center">
           Already have an account?{" "}
           <Link to="/login" className="text-primary hover:underline">
-            login 
+            Login
           </Link>
         </p>
       </div>

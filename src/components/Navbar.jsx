@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import {
   FaHome,
   FaCampground,
@@ -10,10 +10,15 @@ import { FiMenu, FiX } from "react-icons/fi";
 import { Link } from "react-router";
 import logo from "../assets/logo.png";
 import { MdDarkMode, MdLightMode } from "react-icons/md";
+import { AuthContext } from "../authentication/AuthContext";
 
-const Navbar = ({ user, handleLogout }) => {
+
+const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
+
+  const { user, logOut } = useContext(AuthContext);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -22,6 +27,15 @@ const Navbar = ({ user, handleLogout }) => {
 
   const toggleTheme = () => {
     setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logOut();
+      setIsDropdownOpen(false);
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
   };
 
   return (
@@ -35,42 +49,32 @@ const Navbar = ({ user, handleLogout }) => {
         </div>
 
         <div className="hidden lg:flex gap-4 items-center">
-          <Link
-            to="/"
-            className="btn btn-ghost text-base flex items-center gap-2"
-          >
+          <Link to="/" className="btn btn-ghost text-base flex items-center gap-2">
             <FaHome /> Home
           </Link>
-          <Link
-            to="/available-camps"
-            className="btn btn-ghost text-base flex items-center gap-2"
-          >
+          <Link to="/available-camps" className="btn btn-ghost text-base flex items-center gap-2">
             <FaCampground /> Available Camps
           </Link>
 
           {!user ? (
-            <Link
-              to="/login"
-              className="btn btn-primary btn-sm flex items-center gap-2"
-            >
+            <Link to="/login" className="btn btn-primary btn-sm flex items-center gap-2">
               <FaSignInAlt /> Join Us
             </Link>
           ) : (
-            <div className="dropdown dropdown-end">
+            <div className="dropdown dropdown-end relative">
               <button
                 className="btn btn-ghost btn-circle avatar"
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               >
                 <div className="w-10 rounded-full">
                   <img src={user.photoURL || "/user.png"} alt="User Profile" />
                 </div>
               </button>
-              {isMenuOpen && (
-                <ul className="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
-                  <li>
-                    <span className="text-center font-semibold">
-                      {user.displayName || "User"}
-                    </span>
+
+              {isDropdownOpen && (
+                <ul className="absolute right-0 mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
+                  <li className="text-center font-semibold">
+                    {user.displayName || "User"}
                   </li>
                   <li>
                     <Link to="/dashboard">
@@ -92,11 +96,7 @@ const Navbar = ({ user, handleLogout }) => {
             onClick={toggleTheme}
             title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
           >
-            {theme === "light" ? (
-              <MdDarkMode size={20} />
-            ) : (
-              <MdLightMode size={20} />
-            )}
+            {theme === "light" ? <MdDarkMode size={20} /> : <MdLightMode size={20} />}
           </button>
         </div>
 
@@ -112,40 +112,23 @@ const Navbar = ({ user, handleLogout }) => {
         {/* Mobile Menu */}
         {isMenuOpen && (
           <div className="absolute top-16 left-0 right-0 bg-base-100 z-20 flex flex-col items-center gap-2 p-4 shadow-md lg:hidden">
-            <Link
-              to="/"
-              className="btn btn-ghost w-full flex justify-start gap-2"
-            >
+            <Link to="/" className="btn btn-ghost w-full flex justify-start gap-2">
               <FaHome /> Home
             </Link>
-            <Link
-              to="/available-camps"
-              className="btn btn-ghost w-full flex justify-start gap-2"
-            >
+            <Link to="/available-camps" className="btn btn-ghost w-full flex justify-start gap-2">
               <FaCampground /> Available Camps
             </Link>
             {!user ? (
-              <Link
-                to="/login"
-                className="btn btn-primary w-full flex justify-start gap-2"
-              >
+              <Link to="/login" className="btn btn-primary w-full flex justify-start gap-2">
                 <FaSignInAlt /> Join Us
               </Link>
             ) : (
               <>
-                <span className="text-lg font-semibold">
-                  {user.displayName}
-                </span>
-                <Link
-                  to="/dashboard"
-                  className="btn btn-ghost w-full flex justify-start gap-2"
-                >
+                <span className="text-lg font-semibold">{user.displayName}</span>
+                <Link to="/dashboard" className="btn btn-ghost w-full flex justify-start gap-2">
                   <FaTachometerAlt /> Dashboard
                 </Link>
-                <button
-                  onClick={handleLogout}
-                  className="btn btn-ghost w-full flex justify-start gap-2"
-                >
+                <button onClick={handleLogout} className="btn btn-ghost w-full flex justify-start gap-2">
                   <FaSignOutAlt /> Logout
                 </button>
               </>

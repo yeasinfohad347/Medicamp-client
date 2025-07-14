@@ -1,37 +1,79 @@
-import { useState } from "react";
+import { use, useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { FcGoogle } from "react-icons/fc";
 import { toast } from "react-toastify";
-// import useAuth from "../hooks/useAuth"; // if using custom auth context
+import Swal from "sweetalert2";
+import { AuthContext } from "../authentication/AuthContext";
+import useAxiosSecure from "../hooks/useAxiosSecure";
 
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [showPassword, setShowPassword] = useState(false);
+  const { loginUser, signInWithGoogle } = use(AuthContext);
+  const axiosSecure = useAxiosSecure();
 
-  // const { loginUser } = useAuth(); // your custom context function
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    const form = e.target;
-    const email = form.email.value;
-    const password = form.password.value;
+  // Save user to DB (only for Google login)
+  const saveUserToDB = async (user) => {
+    const userInfo = {
+      name: user.displayName,
+      email: user.email,
+      photoURL: user.photoURL,
+      role: "user", // default role
+    };
 
     try {
-      // await loginUser(email, password); // if using Firebase
-      console.log("Logging in with", email, password);
-      toast.success("Login successful");
-      navigate(location?.state?.from?.pathname || "/");
+      await axiosSecure.put(`/users/${user.email}`, userInfo);
     } catch (err) {
-      toast.error("Login failed. Please check credentials.");
+      console.error("Failed to save user to DB", err);
     }
+  };
+
+  const handleGoogleSignIn = () => {
+    signInWithGoogle()
+      .then(async (result) => {
+        const loggedUser = result.user;
+
+        // 🔐 Save user to DB
+        await saveUserToDB(loggedUser);
+
+        toast.success("Logged in with Google!");
+        navigate(location?.state?.from?.pathname || "/");
+      })
+      .catch((err) => {
+        toast.error("Google Sign-In failed. Please try again.");
+        console.error(err);
+      });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const email = e.target.email.value;
+    const password = e.target.password.value;
+
+    loginUser(email, password)
+      .then(() => {
+        Swal.fire({
+          title: "Welcome Back!",
+          text: "You successfully logged in!",
+          icon: "success",
+        });
+        navigate(location?.state?.from?.pathname || "/");
+      })
+      .catch(() => {
+        toast.error("Wrong email or password.");
+      });
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-base-200 px-4">
       <div className="w-full max-w-md bg-base-100 p-8 shadow-lg rounded-lg">
-        <h2 className="text-3xl font-bold text-center mb-6 text-primary">Login to MediCamp</h2>
-        <form onSubmit={handleLogin} className="space-y-4">
+        <h2 className="text-3xl font-bold text-center mb-6 text-primary">
+          Login to MediCamp
+        </h2>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="label">
               <span className="label-text font-medium">Email</span>
@@ -68,6 +110,15 @@ const Login = () => {
 
           <button className="btn btn-primary w-full">Login</button>
         </form>
+
+        <div className="mt-4">
+          <button
+            onClick={handleGoogleSignIn}
+            className="btn btn-outline w-full flex items-center justify-center gap-2"
+          >
+            <FcGoogle size={20} /> Login with Google
+          </button>
+        </div>
 
         <p className="mt-4 text-sm text-center">
           Don’t have an account?{" "}
