@@ -12,6 +12,7 @@ import UserDashboard from "../pages/DashBoard/User/UserDashboard";
 import AdminRoute from "./AdminRoute";
 import DashboardLayout from "../layouts/DashboardLayout";
 import DashboardEntry from "../pages/DashBoard/shared/DashBoardEntry";
+import OrganizerProfile from "../pages/DashBoard/Admin/OrganizerProfile";
 
 export const router = createBrowserRouter([
   {
@@ -53,6 +54,11 @@ export const router = createBrowserRouter([
         index: true,
         element: <DashboardEntry />, // decides which one to show
       },
+      {
+        path:"admin-profile",
+        element:<OrganizerProfile/>
+      },
+
       // {
       //   path: "admin/add-camp",
       //   element: <AddCamp />,

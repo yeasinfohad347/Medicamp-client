@@ -18,7 +18,7 @@ const SideBar = ({ role }) => {
 
         {role === "admin" && (
           <>
-            <NavLink to="/dashboard/profile" className="btn btn-ghost justify-start">
+            <NavLink to="/dashboard/admin-profile" className="btn btn-ghost justify-start">
               <FaUser /> Organizer Profile
             </NavLink>
             <NavLink to="/dashboard/add-camp" className="btn btn-ghost justify-start">
