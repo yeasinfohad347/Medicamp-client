@@ -35,7 +35,7 @@ const SideBar = ({ role }) => {
 
         {role === "user" && (
           <>
-            <NavLink to="/dashboard/analytics" className="btn btn-ghost justify-start">
+            <NavLink to="/dashboard/user/analytics" className="btn btn-ghost justify-start">
               <FaChartBar /> Analytics
             </NavLink>
             <NavLink to="/dashboard/profile" className="btn btn-ghost justify-start">

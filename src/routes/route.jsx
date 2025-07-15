@@ -17,6 +17,7 @@ import AddCamp from "../pages/DashBoard/Admin/AddCamp";
 import ManageCamps from "../pages/DashBoard/Admin/ManageCamps";
 import UpdateCamp from "../pages/DashBoard/Admin/UpdateCamp";
 import ManageRegisteredCamps from "../pages/DashBoard/Admin/ManageRegistredCamp";
+import ParticipantAnalytics from "../pages/DashBoard/User/ParticipantAnalytics";
 
 export const router = createBrowserRouter([
   {
@@ -81,7 +82,11 @@ export const router = createBrowserRouter([
       {
          path: "admin/manage-registered",
        element: <ManageRegisteredCamps />,
-      }
+      },
+      {
+        path: "user/analytics",
+        element: <ParticipantAnalytics />,
+      },
       
 
       // {
