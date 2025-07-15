@@ -13,6 +13,10 @@ import AdminRoute from "./AdminRoute";
 import DashboardLayout from "../layouts/DashboardLayout";
 import DashboardEntry from "../pages/DashBoard/shared/DashBoardEntry";
 import OrganizerProfile from "../pages/DashBoard/Admin/OrganizerProfile";
+import AddCamp from "../pages/DashBoard/Admin/AddCamp";
+import ManageCamps from "../pages/DashBoard/Admin/ManageCamps";
+import UpdateCamp from "../pages/DashBoard/Admin/UpdateCamp";
+import ManageRegisteredCamps from "../pages/DashBoard/Admin/ManageRegistredCamp";
 
 export const router = createBrowserRouter([
   {
@@ -55,9 +59,30 @@ export const router = createBrowserRouter([
         element: <DashboardEntry />, // decides which one to show
       },
       {
-        path:"admin-profile",
-        element:<OrganizerProfile/>
+        path: "admin-profile",
+        element: <OrganizerProfile />,
       },
+      {
+        path: "admin/add-camp",
+        element: <AddCamp />,
+      },
+      {
+        path: "admin/manage-camps",
+        element: <ManageCamps />,
+      },
+      {
+        path: "admin/update-camp/:campId",
+        element: (
+          <PrivateRoute>
+            <UpdateCamp />
+          </PrivateRoute>
+        ),
+      },
+      {
+         path: "admin/manage-registered",
+       element: <ManageRegisteredCamps />,
+      }
+      
 
       // {
       //   path: "admin/add-camp",

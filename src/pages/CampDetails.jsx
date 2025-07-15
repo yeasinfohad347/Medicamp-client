@@ -1,18 +1,18 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { useParams } from "react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 
-
-
 import useAxiosSecure from "../hooks/useAxiosSecure";
+import { AuthContext } from "../authentication/AuthContext";
 
 const CampDetails = () => {
   const { id } = useParams();
   const axiosSecure = useAxiosSecure();
   const queryClient = useQueryClient();
-  
+  const { user } = useContext(AuthContext);
+
   const [showModal, setShowModal] = useState(false);
 
   const {
@@ -37,7 +37,8 @@ const CampDetails = () => {
 
   if (isLoading) return <div className="text-center py-10">Loading...</div>;
 
-  if (isError) return <div className="text-center py-10">Failed to load camp data.</div>;
+  if (isError)
+    return <div className="text-center py-10">Failed to load camp data.</div>;
 
   // Submit handler for Join Camp form
   const onSubmit = async (data) => {
@@ -47,8 +48,10 @@ const CampDetails = () => {
       campFee: camp.fee,
       location: camp.location,
       healthcareProfessional: camp.healthcareProfessional,
-      participantName:"Yeasin",
-      participantEmail:"Forhad",
+      participantName: user.displayName,
+      participantEmail: user.email,
+      paymentStatus: "unpaid", 
+      confirmationStatus: "pending", 
       ...data,
     };
 
@@ -72,21 +75,26 @@ const CampDetails = () => {
         className="rounded-lg w-full h-96 object-cover"
       />
       <h2 className="text-3xl font-bold">{camp.name}</h2>
-      <p><strong>Fee:</strong> ${camp.fee}</p>
+      <p>
+        <strong>Fee:</strong> ${camp.fee}
+      </p>
       <p>
         <strong>Date & Time:</strong> {camp.date} at {camp.time}
       </p>
-      <p><strong>Location:</strong> {camp.location}</p>
+      <p>
+        <strong>Location:</strong> {camp.location}
+      </p>
       <p>
         <strong>Healthcare Professional:</strong> {camp.healthcareProfessional}
       </p>
-      <p><strong>Participants:</strong> {camp.participantCount}</p>
-      <p><strong>Description:</strong> {camp.description}</p>
+      <p>
+        <strong>Participants:</strong> {camp.participantCount}
+      </p>
+      <p>
+        <strong>Description:</strong> {camp.description}
+      </p>
 
-      <button
-        className="btn btn-primary"
-        onClick={() => setShowModal(true)}
-      >
+      <button className="btn btn-primary" onClick={() => setShowModal(true)}>
         Join Camp
       </button>
 
@@ -119,12 +127,12 @@ const CampDetails = () => {
               />
               <input
                 className="input input-bordered w-full"
-                value={"Yesin" }
+                value={user.displayName}
                 readOnly
               />
               <input
                 className="input input-bordered w-full"
-                value={"yeasin@gamil.com" }
+                value={user.email}
                 readOnly
               />
 
@@ -143,7 +151,9 @@ const CampDetails = () => {
                   }`}
                 />
                 {errors.age && (
-                  <p className="text-red-500 text-xs mt-1">{errors.age.message}</p>
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.age.message}
+                  </p>
                 )}
               </div>
 
@@ -163,7 +173,9 @@ const CampDetails = () => {
                   }`}
                 />
                 {errors.phone && (
-                  <p className="text-red-500 text-xs mt-1">{errors.phone.message}</p>
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.phone.message}
+                  </p>
                 )}
               </div>
 
@@ -180,7 +192,9 @@ const CampDetails = () => {
                   <option>Other</option>
                 </select>
                 {errors.gender && (
-                  <p className="text-red-500 text-xs mt-1">{errors.gender.message}</p>
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.gender.message}
+                  </p>
                 )}
               </div>
 

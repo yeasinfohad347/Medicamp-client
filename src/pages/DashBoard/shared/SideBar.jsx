@@ -21,13 +21,13 @@ const SideBar = ({ role }) => {
             <NavLink to="/dashboard/admin-profile" className="btn btn-ghost justify-start">
               <FaUser /> Organizer Profile
             </NavLink>
-            <NavLink to="/dashboard/add-camp" className="btn btn-ghost justify-start">
+            <NavLink to="/dashboard/admin/add-camp" className="btn btn-ghost justify-start">
               <FaPlus /> Add A Camp
             </NavLink>
-            <NavLink to="/dashboard/manage-camps" className="btn btn-ghost justify-start">
+            <NavLink to="/dashboard/admin/manage-camps" className="btn btn-ghost justify-start">
               <MdManageAccounts /> Manage Camps
             </NavLink>
-            <NavLink to="/dashboard/registered-camps" className="btn btn-ghost justify-start">
+            <NavLink to="/dashboard/admin/manage-registered" className="btn btn-ghost justify-start">
               <FaClipboardList /> Manage Registered Camps
             </NavLink>
           </>
