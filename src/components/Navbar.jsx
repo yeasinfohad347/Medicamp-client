@@ -11,6 +11,8 @@ import { Link } from "react-router";
 import logo from "../assets/logo.png";
 import { MdDarkMode, MdLightMode } from "react-icons/md";
 import { AuthContext } from "../authentication/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import useAxiosSecure from "../hooks/useAxiosSecure";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -18,6 +20,7 @@ const Navbar = () => {
   const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
 
   const { user, logOut } = useContext(AuthContext);
+  const axiosSecure = useAxiosSecure();
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -37,6 +40,15 @@ const Navbar = () => {
       console.error("Logout failed:", err);
     }
   };
+
+  const { data: dbUser = {}, isLoading } = useQuery({
+    queryKey: ["dbUser", user?.email],
+    enabled: !!user?.email,
+    queryFn: async () => {
+      const res = await axiosSecure.get(`/users?email=${user.email}`);
+      return res.data;
+    },
+  });
 
   return (
     <div className="pt-5">
@@ -83,7 +95,7 @@ const Navbar = () => {
               {isDropdownOpen && (
                 <ul className="absolute right-0 mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
                   <li className="text-center font-semibold">
-                    {user.displayName || "User"}
+                     {isLoading ? "Loading..." : dbUser?.name || "Admin User"}
                   </li>
                   <li>
                     <Link to="/dashboard">
@@ -147,7 +159,7 @@ const Navbar = () => {
             ) : (
               <>
                 <span className="text-lg font-semibold">
-                  {user.displayName}
+                  {isLoading ? "Loading..." : dbUser?.name || "Admin User"}
                 </span>
                 <Link
                   to="/dashboard"

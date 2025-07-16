@@ -1,14 +1,16 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { AuthContext } from "../../../authentication/AuthContext";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
-
 import Swal from "sweetalert2";
 import Loading from "../../Loading";
 
 const PaymentHistory = () => {
   const { user } = useContext(AuthContext);
   const axiosSecure = useAxiosSecure();
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   const {
     data: paymentHistory = [],
@@ -31,11 +33,19 @@ const PaymentHistory = () => {
     return null;
   }
 
-  const paidCamps = paymentHistory.filter((item) => item.paymentStatus === "paid");
+  const paidCamps = paymentHistory.filter(
+    (item) => item.paymentStatus === "paid"
+  );
+
+  // Pagination logic
+  const totalPages = Math.ceil(paidCamps.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentData = paidCamps.slice(startIndex, startIndex + itemsPerPage);
 
   return (
-    <div className="p-4">
+    <div className="p-4 max-w-6xl mx-auto">
       <h2 className="text-2xl font-bold text-center mb-4">Payment History</h2>
+
       <div className="overflow-x-auto">
         <table className="table table-zebra w-full">
           <thead>
@@ -49,13 +59,15 @@ const PaymentHistory = () => {
             </tr>
           </thead>
           <tbody>
-            {paidCamps.map((camp, index) => (
+            {currentData.map((camp, index) => (
               <tr key={camp._id}>
-                <td>{index + 1}</td>
+                <td>{startIndex + index + 1}</td>
                 <td>{camp.campName}</td>
                 <td>${camp.campFee}</td>
                 <td className="text-sm break-all">
-                  {camp.transactionId || <span className="text-red-500">Missing</span>}
+                  {camp.transactionId || (
+                    <span className="text-red-500">Missing</span>
+                  )}
                 </td>
                 <td className="text-green-600 font-semibold">Paid</td>
                 <td>
@@ -76,6 +88,41 @@ const PaymentHistory = () => {
           </p>
         )}
       </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-6 items-center gap-2 flex-wrap">
+          <button
+            className="btn btn-sm btn-outline"
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+          >
+            Prev
+          </button>
+
+          {[...Array(totalPages)].map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setCurrentPage(idx + 1)}
+              className={`btn btn-sm ${
+                currentPage === idx + 1 ? "btn-primary" : "btn-outline"
+              }`}
+            >
+              {idx + 1}
+            </button>
+          ))}
+
+          <button
+            className="btn btn-sm btn-outline"
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+            }
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 };

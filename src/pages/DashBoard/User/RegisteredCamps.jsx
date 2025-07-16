@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router";
 import Swal from "sweetalert2";
@@ -14,7 +14,14 @@ const RegisteredCamps = () => {
   const [feedback, setFeedback] = useState("");
   const [rating, setRating] = useState(0);
 
-  const { data: registrations = [], refetch, isLoading } = useQuery({
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  const {
+    data: registrations = [],
+    refetch,
+    isLoading,
+  } = useQuery({
     queryKey: ["registeredCamps", user?.email],
     enabled: !!user?.email,
     queryFn: async () => {
@@ -37,13 +44,16 @@ const RegisteredCamps = () => {
     if (confirm.isConfirmed) {
       const res = await axiosSecure.delete(`/registrations/${id}`);
       if (res.data.deleteResult.deletedCount > 0) {
-        Swal.fire("Canceled!", "Your registration has been canceled.", "success");
+        Swal.fire(
+          "Canceled!",
+          "Your registration has been canceled.",
+          "success"
+        );
         refetch();
       }
     }
   };
 
-  // Updated openFeedback function to also store camp name
   const openFeedback = (id, campName) => {
     setFeedbackCampId(id);
     setFeedbackCampName(campName);
@@ -75,13 +85,22 @@ const RegisteredCamps = () => {
     }
   };
 
+  const totalPages = Math.ceil(registrations.length / itemsPerPage);
+  const paginatedRegistrations = registrations.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   if (isLoading) return <p className="text-center mt-4">Loading...</p>;
 
   return (
     <div className="p-4">
-      <h2 className="text-2xl font-bold mb-4 text-center">My Registered Camps</h2>
+      <h2 className="text-2xl font-bold mb-4 text-center">
+        My Registered Camps
+      </h2>
+
       <div className="overflow-x-auto">
-        <table className="table table-zebra w-full">
+        <table className="table table-zebra w-full text-sm sm:text-base">
           <thead>
             <tr>
               <th>#</th>
@@ -93,9 +112,9 @@ const RegisteredCamps = () => {
             </tr>
           </thead>
           <tbody>
-            {registrations.map((reg, index) => (
+            {paginatedRegistrations.map((reg, index) => (
               <tr key={reg._id}>
-                <td>{index + 1}</td>
+                <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
                 <td>{reg.campName}</td>
                 <td>${reg.campFee}</td>
                 <td>
@@ -108,7 +127,9 @@ const RegisteredCamps = () => {
                   )}
                 </td>
                 <td>
-                  {reg.paymentStatus === "paid" && reg.confirmationStatus ? "Confirmed" : "Pending"}
+                  {reg.paymentStatus === "paid" && reg.confirmationStatus
+                    ? "Confirmed"
+                    : "Pending"}
                 </td>
                 <td className="flex flex-wrap gap-2">
                   {reg.paymentStatus === "paid" && (
@@ -138,6 +159,41 @@ const RegisteredCamps = () => {
           </p>
         )}
       </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-6 items-center gap-2 flex-wrap">
+          <button
+            className="btn btn-sm btn-outline"
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+          >
+            Prev
+          </button>
+
+          {[...Array(totalPages)].map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setCurrentPage(idx + 1)}
+              className={`btn btn-sm ${
+                currentPage === idx + 1 ? "btn-primary" : "btn-outline"
+              }`}
+            >
+              {idx + 1}
+            </button>
+          ))}
+
+          <button
+            className="btn btn-sm btn-outline"
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+            }
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </button>
+        </div>
+      )}
 
       {/* Feedback Modal */}
       <dialog id="feedbackModal" className="modal">

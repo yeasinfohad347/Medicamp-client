@@ -1,10 +1,13 @@
 import { useContext, useEffect, useState } from "react";
-
-import { FaMoon, FaSun, FaSignOutAlt } from "react-icons/fa";
+import { FaMoon, FaSun, FaSignOutAlt, FaBars } from "react-icons/fa";
+import { useQuery } from "@tanstack/react-query";
 import { AuthContext } from "../../../authentication/AuthContext";
+import useAxiosSecure from "../../../hooks/useAxiosSecure";
 
-const Topbar = () => {
+const Topbar = ({ onToggleSidebar }) => {
   const { user, logOut } = useContext(AuthContext);
+  const axiosSecure = useAxiosSecure();
+
   const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
 
   useEffect(() => {
@@ -25,12 +28,35 @@ const Topbar = () => {
     }
   };
 
+  // ✅ Get user info from your MongoDB
+  const { data: dbUser = {}, isLoading } = useQuery({
+    queryKey: ["dbUser", user?.email],
+    enabled: !!user?.email,
+    queryFn: async () => {
+      const res = await axiosSecure.get(`/users?email=${user.email}`);
+      return res.data;
+    },
+  });
+
   return (
     <div className="navbar bg-base-100 shadow-sm px-4">
-      <div className="flex-1">
-        <h1 className="text-xl font-bold text-primary">Dashboard</h1>
+      {/* Hamburger menu for mobile */}
+      <div className="flex-none md:hidden">
+        <button
+          onClick={onToggleSidebar}
+          className="btn btn-ghost btn-square"
+          aria-label="Open sidebar"
+        >
+          <FaBars size={20} />
+        </button>
       </div>
 
+      {/* Title */}
+      <div className="flex-1">
+        <h1 className="text-xl font-bold text-primary truncate">Dashboard</h1>
+      </div>
+
+      {/* Actions */}
       <div className="flex items-center gap-4">
         {/* Theme Toggle */}
         <button
@@ -41,7 +67,7 @@ const Topbar = () => {
           {theme === "light" ? <FaMoon /> : <FaSun />}
         </button>
 
-        {/* User Avatar */}
+        {/* User Avatar Dropdown */}
         <div className="dropdown dropdown-end">
           <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
             <div className="w-10 rounded-full">
@@ -52,12 +78,11 @@ const Topbar = () => {
             tabIndex={0}
             className="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52"
           >
-            <li className="text-center font-semibold">{user?.displayName}</li>
+            <li className="text-center font-semibold truncate">
+              {isLoading ? "Loading..." : dbUser?.name || "Unknown User"}
+            </li>
             <li>
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-2"
-              >
+              <button onClick={handleLogout} className="flex items-center gap-2">
                 <FaSignOutAlt /> Logout
               </button>
             </li>

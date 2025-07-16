@@ -1,95 +1,164 @@
-// src/pages/Dashboard/User/ParticipantProfile.jsx
-
+import { useContext, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { useEffect } from "react";
-import useAxiosSecure from "../../../hooks/useAxiosSecure";
-import { useContext } from "react";
-import { AuthContext } from "../../../authentication/AuthContext";
 import Swal from "sweetalert2";
+import { AuthContext } from "../../../authentication/AuthContext";
+import useAxiosSecure from "../../../hooks/useAxiosSecure";
+import { useQuery } from "@tanstack/react-query";
 
 const ParticipantProfile = () => {
-  const { user } = useContext(AuthContext);
+  const { user, setUser } = useContext(AuthContext);
   const axiosSecure = useAxiosSecure();
 
   const {
     register,
     handleSubmit,
     reset,
-    formState: { errors, isSubmitting }
+    formState: { errors },
   } = useForm();
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const res = await axiosSecure.get(`/participant/profile/${user.email}`);
-        reset(res.data);
-      } catch (error) {
-        console.error("Failed to load profile", error);
-      }
-    };
+  const {
+    data: dbUser = {},
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ["dbUser", user?.email],
+    enabled: !!user?.email,
+    queryFn: async () => {
+      const res = await axiosSecure.get(`/users?email=${user.email}`);
+      return res.data;
+    },
+  });
 
-    if (user?.email) {
-      fetchProfile();
+  useEffect(() => {
+    if (dbUser) {
+      reset({
+        firstName: dbUser?.name?.split(" ")[0] || "",
+        lastName: dbUser?.name?.split(" ")[1] || "",
+        email: dbUser?.email || "",
+        contact: dbUser?.contact || "",
+        bio: dbUser?.bio || "",
+      });
     }
-  }, [user?.email, axiosSecure, reset]);
+  }, [dbUser, reset]);
 
   const onSubmit = async (data) => {
+    const updatedUser = {
+      displayName: `${data.firstName} ${data.lastName}`,
+      contact: data.contact,
+      bio: data.bio,
+    };
+
     try {
-      const res = await axiosSecure.put(`/participant/profile/${user.email}`, data);
-      if (res.data.modifiedCount > 0) {
-        Swal.fire("Updated!", "Profile updated successfully", "success");
+      const res = await axiosSecure.put(`/users/${user.email}`, {
+        ...updatedUser,
+        role: "user", // preserve role
+      });
+
+      if (res.data.modifiedCount > 0 || res.data.upsertedCount > 0) {
+        setUser((prev) => ({
+          ...prev,
+          ...updatedUser,
+        }));
+
+        await refetch();
+        Swal.fire("Success!", "Profile updated successfully.", "success");
       } else {
-        Swal.fire("No Changes", "Nothing was updated", "info");
+        Swal.fire("Info", "No changes were made.", "info");
       }
     } catch (error) {
-      console.error("Update failed", error);
-      Swal.fire("Error", "Something went wrong", "error");
+      Swal.fire("Error", "Failed to update profile.", "error");
+      console.error(error);
     }
   };
 
   return (
-    <div className="max-w-2xl mx-auto bg-base-100 p-6 rounded-md shadow-md">
-      <h2 className="text-2xl font-bold mb-6 text-center text-primary">
-        Manage Your Profile
-      </h2>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <div className="max-w-4xl mx-auto bg-base-100 p-6 rounded-lg shadow-md">
+      <h2 className="text-3xl font-bold mb-1 text-primary">User Profile</h2>
+      <p className="mb-6 text-gray-500">
+        Manage your personal information and settings
+      </p>
 
-        <div>
-          <label className="label">Full Name</label>
-          <input
-            {...register("name", { required: true })}
-            className="input input-bordered w-full"
-          />
-          {errors.name && <span className="text-red-500">Name is required</span>}
+      <div className="flex items-center gap-4 mb-6">
+        <div className="avatar placeholder">
+          <div className="bg-primary text-white rounded-full w-16 h-16 flex items-center justify-center text-2xl">
+            <img src={user?.photoURL} alt="Profile" />
+          </div>
         </div>
-
         <div>
-          <label className="label">Profile Image URL</label>
-          <input
-            {...register("image", { required: true })}
-            className="input input-bordered w-full"
-          />
-          {errors.image && <span className="text-red-500">Image URL is required</span>}
+          <h3 className="text-xl font-bold">
+            {isLoading ? "Loading..." : dbUser?.name || "User"}
+          </h3>
+          <p className="text-sm text-gray-500">Participant Account</p>
         </div>
+      </div>
 
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="grid grid-cols-1 md:grid-cols-2 gap-4"
+      >
+        {/* First Name */}
         <div>
-          <label className="label">Contact Number</label>
+          <label className="label font-medium">First Name</label>
           <input
-            type="text"
-            {...register("contact", {
-              required: true,
-              pattern: /^[0-9]{10,15}$/,
-            })}
+            {...register("firstName", { required: "First name is required" })}
             className="input input-bordered w-full"
           />
-          {errors.contact && (
-            <span className="text-red-500">Valid contact number is required</span>
+          {errors.firstName && (
+            <p className="text-red-500 text-sm">{errors.firstName.message}</p>
           )}
         </div>
 
-        <button type="submit" className="btn btn-primary w-full" disabled={isSubmitting}>
-          Update Profile
-        </button>
+        {/* Last Name */}
+        <div>
+          <label className="label font-medium">Last Name</label>
+          <input
+            {...register("lastName", { required: "Last name is required" })}
+            className="input input-bordered w-full"
+          />
+          {errors.lastName && (
+            <p className="text-red-500 text-sm">{errors.lastName.message}</p>
+          )}
+        </div>
+
+        {/* Email (disabled) */}
+        <div>
+          <label className="label font-medium">Email Address</label>
+          <input
+            disabled
+            className="input input-bordered w-full bg-base-200"
+            value={user?.email}
+          />
+        </div>
+
+        {/* Contact */}
+        <div>
+          <label className="label font-medium">Phone Number</label>
+          <input
+            {...register("contact", { required: "Phone number is required" })}
+            className="input input-bordered w-full"
+            placeholder="e.g. +8801XXXXXXXXX"
+          />
+          {errors.contact && (
+            <p className="text-red-500 text-sm">{errors.contact.message}</p>
+          )}
+        </div>
+
+        {/* Bio */}
+        <div className="md:col-span-2">
+          <label className="label font-medium">Bio</label>
+          <textarea
+            {...register("bio")}
+            rows={3}
+            className="textarea textarea-bordered w-full"
+            placeholder="Write a short bio about yourself..."
+          />
+        </div>
+
+        <div className="md:col-span-2">
+          <button className="btn btn-primary w-full mt-2">
+            Update Profile
+          </button>
+        </div>
       </form>
     </div>
   );
