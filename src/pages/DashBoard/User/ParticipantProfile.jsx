@@ -5,8 +5,8 @@ import { AuthContext } from "../../../authentication/AuthContext";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import { useQuery } from "@tanstack/react-query";
 
-const ParticipantProfile = () => {
-  const { user, setUser,updatedUser } = useContext(AuthContext);
+const  ParticipantProfile = () => {
+  const { user, setUser } = useContext(AuthContext);
   const axiosSecure = useAxiosSecure();
 
   const {
@@ -28,6 +28,7 @@ const ParticipantProfile = () => {
       return res.data;
     },
   });
+  console.log(dbUser);
 
   useEffect(() => {
     if (dbUser) {
@@ -47,13 +48,13 @@ const ParticipantProfile = () => {
       contact: data.contact,
       bio: data.bio,
     };
+    console.log(updatedUser);
 
     try {
       const res = await axiosSecure.put(`/users/${user.email}`, {
         ...updatedUser,
         role: "user", // preserve role
       });
-       await updatedUser({ displayName: name, photoURL: uploadedImageURL });
 
       if (res.data.modifiedCount > 0 || res.data.upsertedCount > 0) {
         setUser((prev) => ({

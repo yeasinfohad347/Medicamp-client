@@ -1,8 +1,7 @@
-import { use, useState } from "react";
+import { useContext, useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
-import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import { AuthContext } from "../authentication/AuthContext";
 import useAxiosSecure from "../hooks/useAxiosSecure";
@@ -11,48 +10,55 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [showPassword, setShowPassword] = useState(false);
-  const { loginUser, signInWithGoogle } = use(AuthContext);
+  const { loginUser, signInWithGoogle } = useContext(AuthContext);
   const axiosSecure = useAxiosSecure();
 
-  // Save user to DB (only for Google login)
+  // ✅ Save user to DB if not already exists
   const saveUserToDB = async (user) => {
-    const userInfo = {
-      name: user.displayName,
-      email: user.email,
-      photoURL: user.photoURL,
-      role: "user", // default role
-      contact: "", // initially empty
-    };
-
     try {
+      // Check if user already exists in DB
+      const checkRes = await axiosSecure.get(`/users?email=${user.email}`);
+      const existingUser = checkRes.data;
+
+      // If exists, don't overwrite existing role (admin/user)
+      const userInfo = {
+        name: user.displayName,
+        email: user.email,
+        photoURL: user.photoURL,
+        role: existingUser?.role || "user", // Preserve role if exists
+        contact: existingUser?.contact || "",
+      };
+
       await axiosSecure.put(`/users/${user.email}`, userInfo);
 
-      //  Now request JWT
+      // Get JWT
       const tokenRes = await axiosSecure.post("/jwt", { email: user.email });
       const token = tokenRes.data.token;
 
-      //  Store it in localStorage
       localStorage.setItem("access-token", token);
     } catch (err) {
       console.error("Failed to save user or fetch JWT:", err);
     }
   };
 
-  const handleGoogleSignIn = () => {
-    signInWithGoogle()
-      .then(async (result) => {
-        const loggedUser = result.user;
+  const handleGoogleSignIn = async () => {
+    try {
+      const result = await signInWithGoogle();
+      const loggedUser = result.user;
 
-        // 🔐 Save user to DB
-        await saveUserToDB(loggedUser);
+      await saveUserToDB(loggedUser);
 
-        toast.success("Logged in with Google!");
-        navigate(location?.state?.from?.pathname || "/");
-      })
-      .catch((err) => {
-        toast.error("Google Sign-In failed. Please try again.");
-        console.error(err);
+      Swal.fire({
+        icon: "success",
+        title: "Welcome!",
+        text: "Logged in with Google.",
       });
+
+      navigate(location?.state?.from?.pathname || "/");
+    } catch (err) {
+      console.error(err);
+      Swal.fire("Error", "Google sign-in failed.", "error");
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -63,10 +69,7 @@ const Login = () => {
     try {
       await loginUser(email, password);
 
-      // 🔐 Request JWT from backend
       const res = await axiosSecure.post("/jwt", { email });
-
-      // ✅ Save token
       localStorage.setItem("access-token", res.data.token);
 
       Swal.fire({
@@ -77,8 +80,8 @@ const Login = () => {
 
       navigate(location?.state?.from?.pathname || "/");
     } catch (err) {
-      toast.error("Wrong email or password.");
       console.error(err);
+      Swal.fire("Error", "Invalid email or password.", "error");
     }
   };
 
@@ -91,9 +94,7 @@ const Login = () => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="label">
-              <span className="label-text font-medium">Email</span>
-            </label>
+            <label className="label font-medium">Email</label>
             <input
               type="email"
               name="email"
@@ -104,9 +105,7 @@ const Login = () => {
           </div>
 
           <div>
-            <label className="label">
-              <span className="label-text font-medium">Password</span>
-            </label>
+            <label className="label font-medium">Password</label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}

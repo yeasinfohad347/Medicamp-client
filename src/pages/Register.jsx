@@ -13,10 +13,10 @@ const Register = () => {
   const [imageName, setImageName] = useState("No file chosen");
   const [isUploading, setIsUploading] = useState(false);
 
-  const { creatUser, updateUser, signInWithGoogle, setUser } = useContext(AuthContext);
+  const { creatUser, signInWithGoogle, setUser, updateUser } = useContext(AuthContext);
   const axiosSecure = useAxiosSecure();
 
-  const imgbbApiKey = "e41f298c2814ebe3b0e61497969e7d44"; 
+  const imgbbApiKey = "e41f298c2814ebe3b0e61497969e7d44";
 
   const handleImageUploadToImgBB = async (imageFile) => {
     const formData = new FormData();
@@ -40,21 +40,26 @@ const Register = () => {
   };
 
   const saveUserToDB = async (user) => {
-    const userInfo = {
-      name: user.displayName,
-      email: user.email,
-      photoURL: user.photoURL,
-      role: "user",
-      contact: "",
-    };
-
     try {
+      // Step 1: Check if user already exists
+      const res = await axiosSecure.get(`/users?email=${user.email}`);
+      const existingUser = res.data;
+
+      // Step 2: Prepare user data
+      const userInfo = {
+        displayName: user.displayName,
+        email: user.email,
+        photoURL: user.photoURL,
+        role: existingUser?.role || "user", 
+        contact: existingUser?.contact || "",
+      };
+      console.log(userInfo);
+      // Step 3: Save or update user
       await axiosSecure.put(`/users/${user.email}`, userInfo);
 
-      // Get JWT token
+      // Step 4: Get and store JWT token
       const tokenRes = await axiosSecure.post("/jwt", { email: user.email });
       const token = tokenRes.data.token;
-
       localStorage.setItem("access-token", token);
     } catch (err) {
       console.error("Failed to save user or fetch JWT:", err);
@@ -80,24 +85,24 @@ const Register = () => {
     }
 
     try {
-      // Upload image to ImgBB
       const uploadedImageURL = await handleImageUploadToImgBB(image);
 
-      // Create user in Firebase
+      // Step 1: Create Firebase user
       const result = await creatUser(email, password);
 
-      // Update Firebase user profile
-     
+      // Step 2: Update Firebase profile
+      await updateUser({ displayName: name, photoURL: uploadedImageURL });
+    
 
+      // Step 3: Set local user context
       const updatedUser = {
         ...result.user,
         displayName: name,
         photoURL: uploadedImageURL,
       };
-
       setUser(updatedUser);
-
-      // Save user to DB and get token
+        console.log(updatedUser);
+      // Step 4: Save to DB
       await saveUserToDB(updatedUser);
 
       Swal.fire({

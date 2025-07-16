@@ -28,7 +28,7 @@ const Topbar = ({ onToggleSidebar }) => {
     }
   };
 
-  // ✅ Get user info from your MongoDB
+  
   const { data: dbUser = {}, isLoading } = useQuery({
     queryKey: ["dbUser", user?.email],
     enabled: !!user?.email,
