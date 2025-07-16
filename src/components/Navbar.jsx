@@ -95,7 +95,9 @@ const Navbar = () => {
               {isDropdownOpen && (
                 <ul className="absolute right-0 mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
                   <li className="text-center font-semibold">
-                     {isLoading ? "Loading..." : dbUser?.name || "Admin User"}
+                    {isLoading
+                      ? "Loading..."
+                      : dbUser?.name || user?.displayName || "Admin User"}
                   </li>
                   <li>
                     <Link to="/dashboard">
@@ -159,7 +161,9 @@ const Navbar = () => {
             ) : (
               <>
                 <span className="text-lg font-semibold">
-                  {isLoading ? "Loading..." : dbUser?.name || "Admin User"}
+                  {isLoading
+                    ? "Loading..."
+                    : dbUser?.name || user?.displayName || "Admin User"}
                 </span>
                 <Link
                   to="/dashboard"

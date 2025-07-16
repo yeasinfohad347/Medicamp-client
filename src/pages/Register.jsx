@@ -3,7 +3,6 @@ import { Link, useNavigate, useLocation } from "react-router";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import Swal from "sweetalert2";
-import { toast } from "react-toastify";
 import { AuthContext } from "../authentication/AuthContext";
 import useAxiosSecure from "../hooks/useAxiosSecure";
 
@@ -12,33 +11,55 @@ const Register = () => {
   const location = useLocation();
   const [showPassword, setShowPassword] = useState(false);
   const [imageName, setImageName] = useState("No file chosen");
+  const [isUploading, setIsUploading] = useState(false);
 
   const { creatUser, updateUser, signInWithGoogle, setUser } = useContext(AuthContext);
   const axiosSecure = useAxiosSecure();
 
-  const saveUserToDB = async (user) => {
-  const userInfo = {
-    name: user.displayName,
-    email: user.email,
-    photoURL: user.photoURL,
-    role: "user", // default role
-    contact: ""   // initially empty
+  const imgbbApiKey = "e41f298c2814ebe3b0e61497969e7d44"; 
+
+  const handleImageUploadToImgBB = async (imageFile) => {
+    const formData = new FormData();
+    formData.append("image", imageFile);
+
+    setIsUploading(true);
+    try {
+      const res = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbApiKey}`, {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.success) {
+        return data.data.url;
+      } else {
+        throw new Error("Image upload failed");
+      }
+    } finally {
+      setIsUploading(false);
+    }
   };
 
-  try {
-    await axiosSecure.put(`/users/${user.email}`, userInfo);
+  const saveUserToDB = async (user) => {
+    const userInfo = {
+      name: user.displayName,
+      email: user.email,
+      photoURL: user.photoURL,
+      role: "user",
+      contact: "",
+    };
 
-    // Now request JWT
-    const tokenRes = await axiosSecure.post("/jwt", { email: user.email });
-    const token = tokenRes.data.token;
+    try {
+      await axiosSecure.put(`/users/${user.email}`, userInfo);
 
-    // Store it in localStorage
-    localStorage.setItem("access-token", token);
-  } catch (err) {
-    console.error("Failed to save user or fetch JWT:", err);
-  }
-};
+      // Get JWT token
+      const tokenRes = await axiosSecure.post("/jwt", { email: user.email });
+      const token = tokenRes.data.token;
 
+      localStorage.setItem("access-token", token);
+    } catch (err) {
+      console.error("Failed to save user or fetch JWT:", err);
+    }
+  };
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -50,40 +71,56 @@ const Register = () => {
 
     const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}$/;
     if (!passwordRegex.test(password)) {
-      toast.error("Password must contain at least 1 uppercase, 1 lowercase, and 6+ characters.");
+      Swal.fire({
+        icon: "error",
+        title: "Weak Password",
+        text: "Password must contain at least 1 uppercase, 1 lowercase, and 6+ characters.",
+      });
       return;
     }
 
     try {
-      const result = await creatUser(email, password);
-      const photoUrl = image ? URL.createObjectURL(image) : "";
+      // Upload image to ImgBB
+      const uploadedImageURL = await handleImageUploadToImgBB(image);
 
-      await updateUser({ displayName: name, photoURL: photoUrl });
+      // Create user in Firebase
+      const result = await creatUser(email, password);
+
+      // Update Firebase user profile
+     
 
       const updatedUser = {
         ...result.user,
         displayName: name,
-        photoURL: photoUrl,
+        photoURL: uploadedImageURL,
       };
 
       setUser(updatedUser);
+
+      // Save user to DB and get token
       await saveUserToDB(updatedUser);
-    
 
       Swal.fire({
-        title: "Success!",
-        text: "Registration completed successfully.",
         icon: "success",
-        confirmButtonText: "OK",
+        title: "Registration Successful",
+        text: "Your account has been created.",
       });
 
       navigate(location?.state?.from?.pathname || "/");
     } catch (err) {
+      console.error(err);
       if (err.code === "auth/email-already-in-use") {
-        toast.error("Email is already registered.");
+        Swal.fire({
+          icon: "error",
+          title: "Email in Use",
+          text: "This email is already registered.",
+        });
       } else {
-        toast.error("Registration failed. Try again.");
-        console.error(err);
+        Swal.fire({
+          icon: "error",
+          title: "Registration Failed",
+          text: "Something went wrong. Please try again.",
+        });
       }
     }
   };
@@ -94,11 +131,20 @@ const Register = () => {
         const loggedUser = result.user;
         await saveUserToDB(loggedUser);
 
-        toast.success("Signed in with Google!");
+        Swal.fire({
+          icon: "success",
+          title: "Welcome!",
+          text: "Signed in with Google successfully.",
+        });
+
         navigate(location?.state?.from?.pathname || "/");
       })
       .catch((err) => {
-        toast.error("Google sign-in failed.");
+        Swal.fire({
+          icon: "error",
+          title: "Google Sign-In Failed",
+          text: "Please try again later.",
+        });
         console.error(err);
       });
   };
@@ -129,7 +175,10 @@ const Register = () => {
                 className="input input-bordered w-full pr-10"
                 placeholder="••••••••"
               />
-              <span className="absolute top-3 right-3 cursor-pointer text-gray-500" onClick={() => setShowPassword((prev) => !prev)}>
+              <span
+                className="absolute top-3 right-3 cursor-pointer text-gray-500"
+                onClick={() => setShowPassword((prev) => !prev)}
+              >
                 {showPassword ? <FaEyeSlash /> : <FaEye />}
               </span>
             </div>
@@ -148,7 +197,9 @@ const Register = () => {
             <span className="text-xs text-gray-500 mt-1">{imageName}</span>
           </div>
 
-          <button type="submit" className="btn btn-primary w-full">Register</button>
+          <button type="submit" className="btn btn-primary w-full" disabled={isUploading}>
+            {isUploading ? "Uploading Image..." : "Register"}
+          </button>
         </form>
 
         <div className="mt-4">

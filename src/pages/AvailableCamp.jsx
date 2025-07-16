@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import useAxiosSecure from "../hooks/useAxiosSecure";
 import { useState } from "react";
 import { HiViewGrid, HiViewList } from "react-icons/hi";
+import { Helmet } from "react-helmet-async";
 
 const AvailableCamp = () => {
   const axiosSecure = useAxiosSecure();
@@ -48,6 +49,9 @@ const AvailableCamp = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
+      <Helmet>
+        <title>Available camp</title>
+      </Helmet>
       <h2 className="text-3xl font-bold text-center mb-6">All Available Camps</h2>
 
       {/* Search and controls */}

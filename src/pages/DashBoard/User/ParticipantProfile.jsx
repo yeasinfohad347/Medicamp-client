@@ -6,7 +6,7 @@ import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import { useQuery } from "@tanstack/react-query";
 
 const ParticipantProfile = () => {
-  const { user, setUser } = useContext(AuthContext);
+  const { user, setUser,updatedUser } = useContext(AuthContext);
   const axiosSecure = useAxiosSecure();
 
   const {
@@ -53,6 +53,7 @@ const ParticipantProfile = () => {
         ...updatedUser,
         role: "user", // preserve role
       });
+       await updatedUser({ displayName: name, photoURL: uploadedImageURL });
 
       if (res.data.modifiedCount > 0 || res.data.upsertedCount > 0) {
         setUser((prev) => ({

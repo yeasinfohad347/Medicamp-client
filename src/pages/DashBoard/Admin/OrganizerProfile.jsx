@@ -54,7 +54,7 @@ const OrganizerProfile = () => {
     };
 
     try {
-      const res = await axiosSecure.put(`/users/${user.email}`, {
+      const res = await axiosSecure.put(`/users/admin/${user.email}`, {
         ...updatedUser,
         role: "admin", // keep role unchanged
       });
