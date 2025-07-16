@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router";
 import Swal from "sweetalert2";
@@ -10,6 +10,7 @@ const RegisteredCamps = () => {
   const axiosSecure = useAxiosSecure();
 
   const [feedbackCampId, setFeedbackCampId] = useState(null);
+  const [feedbackCampName, setFeedbackCampName] = useState("");
   const [feedback, setFeedback] = useState("");
   const [rating, setRating] = useState(0);
 
@@ -42,8 +43,10 @@ const RegisteredCamps = () => {
     }
   };
 
-  const openFeedback = (id) => {
+  // Updated openFeedback function to also store camp name
+  const openFeedback = (id, campName) => {
     setFeedbackCampId(id);
+    setFeedbackCampName(campName);
     setFeedback("");
     setRating(0);
     document.getElementById("feedbackModal").showModal();
@@ -55,16 +58,21 @@ const RegisteredCamps = () => {
       return;
     }
 
-    await axiosSecure.post("/feedbacks", {
-      campId: feedbackCampId,
-      participantEmail: user.email,
-      feedback,
-      rating,
-      date: new Date().toISOString(),
-    });
-
-    Swal.fire("Success", "Thanks for your feedback!", "success");
-    document.getElementById("feedbackModal").close();
+    try {
+      await axiosSecure.post("/feedbacks", {
+        campId: feedbackCampId,
+        campName: feedbackCampName,
+        participantEmail: user.email,
+        feedback,
+        rating,
+        date: new Date().toISOString(),
+      });
+      Swal.fire("Success", "Thanks for your feedback!", "success");
+      document.getElementById("feedbackModal").close();
+    } catch (err) {
+      console.error("Feedback submission failed", err);
+      Swal.fire("Error", "Failed to submit feedback.", "error");
+    }
   };
 
   if (isLoading) return <p className="text-center mt-4">Loading...</p>;
@@ -106,7 +114,7 @@ const RegisteredCamps = () => {
                   {reg.paymentStatus === "paid" && (
                     <button
                       className="btn btn-sm btn-info"
-                      onClick={() => openFeedback(reg._id)}
+                      onClick={() => openFeedback(reg._id, reg.campName)}
                     >
                       Feedback
                     </button>
@@ -149,7 +157,9 @@ const RegisteredCamps = () => {
           >
             <option value={0}>Select Rating</option>
             {[1, 2, 3, 4, 5].map((r) => (
-              <option key={r} value={r}>{r} Star</option>
+              <option key={r} value={r}>
+                {r} Star
+              </option>
             ))}
           </select>
           <div className="modal-action">
