@@ -6,18 +6,16 @@ import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { FaStar } from "react-icons/fa";
 
 const ParticipantFeedback = () => {
-  const { user } = useContext(AuthContext);
+  
   const axiosSecure = useAxiosSecure();
   const [feedbacks, setFeedbacks] = useState([]);
 
   useEffect(() => {
-    if (user?.email) {
-      axiosSecure
-        .get(`/feedbacks`)
-        .then((res) => setFeedbacks(res.data))
-        .catch((err) => console.error("Failed to fetch feedbacks", err));
-    }
-  }, [user, axiosSecure]);
+    axiosSecure
+      .get(`/feedbacks`)
+      .then((res) => setFeedbacks(res.data))
+      .catch((err) => console.error("Failed to fetch feedbacks", err));
+  }, [axiosSecure]);
 
   const renderStars = (count) => {
     return [...Array(count)].map((_, idx) => (
@@ -52,9 +50,7 @@ const ParticipantFeedback = () => {
               <h3 className="text-xl md:text-2xl font-semibold text-primary mb-2">
                 {item.campName}
               </h3>
-              <div className="mb-2">
-                {renderStars(item.rating)}
-              </div>
+              <div className="mb-2">{renderStars(item.rating)}</div>
               <p className="text-base italic text-gray-700 dark:text-gray-200 mb-4">
                 “{item.feedback}”
               </p>

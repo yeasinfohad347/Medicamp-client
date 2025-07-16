@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const axiosSecure = axios.create({
-  baseURL: "http://localhost:3000",
+  baseURL: "https://medi-camp-server-eight.vercel.app",
 });
 
 // Request interceptor to add JWT token

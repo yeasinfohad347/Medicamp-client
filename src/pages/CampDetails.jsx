@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 
 import useAxiosSecure from "../hooks/useAxiosSecure";
 import { AuthContext } from "../authentication/AuthContext";
+import Loading from "./Loading";
 
 const CampDetails = () => {
   const { id } = useParams();
@@ -35,7 +36,7 @@ const CampDetails = () => {
     reset,
   } = useForm();
 
-  if (isLoading) return <div className="text-center py-10">Loading...</div>;
+  if (isLoading) return <div className="text-center py-10"><Loading/></div>;
 
   if (isError)
     return <div className="text-center py-10">Failed to load camp data.</div>;

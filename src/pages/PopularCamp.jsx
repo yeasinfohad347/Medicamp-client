@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import useAxiosSecure from "../hooks/useAxiosSecure";
 import CampCard from "./CampCard";
 import { motion } from "framer-motion";
+import Loading from "./Loading";
 
 const PopularCamp = () => {
   const axiosSecure = useAxiosSecure();
@@ -21,7 +22,7 @@ const PopularCamp = () => {
 
   if (isLoading)
     return (
-      <div className="text-center py-10 text-lg">Loading popular camps...</div>
+      <div className="text-center py-10 text-lg"><Loading/></div>
     );
   if (isError)
     return (

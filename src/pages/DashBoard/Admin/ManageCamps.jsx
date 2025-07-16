@@ -4,6 +4,7 @@ import Swal from "sweetalert2";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import { useContext, useState } from "react";
 import { AuthContext } from "../../../authentication/AuthContext";
+import Loading from "../../Loading";
 
 const ManageCamps = () => {
   const axiosSecure = useAxiosSecure();
@@ -61,7 +62,7 @@ const ManageCamps = () => {
       </h2>
 
       {isLoading ? (
-        <p className="text-center">Loading...</p>
+        <p className="text-center"><Loading/></p>
       ) : camps.length === 0 ? (
         <p className="text-center text-gray-500">No camps found.</p>
       ) : (

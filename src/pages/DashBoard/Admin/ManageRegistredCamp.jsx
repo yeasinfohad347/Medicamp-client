@@ -3,6 +3,7 @@ import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import Swal from "sweetalert2";
 import { useContext, useState } from "react";
 import { AuthContext } from "../../../authentication/AuthContext";
+import Loading from "../../Loading";
 
 const ManageRegistredCamp = () => {
   const axiosSecure = useAxiosSecure();
@@ -68,7 +69,7 @@ const ManageRegistredCamp = () => {
     }
   };
 
-  if (isLoading) return <p className="text-center">Loading...</p>;
+  if (isLoading) return <p className="text-center"><Loading/></p>;
 
   const totalPages = Math.ceil(registered.length / itemsPerPage);
   const currentItems = registered.slice(

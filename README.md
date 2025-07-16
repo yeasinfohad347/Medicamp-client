@@ -1,12 +1,83 @@
-# React + Vite
+🏥 MediCamp - Medical Camp Management System (MCMS)
+A full-stack MERN web application that simplifies the organization and participation of medical camps. It provides role-based dashboards for Admins, Organizers, and Participants to manage and track medical camp activities efficiently.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+🔗 Live URL: https://medi-camp-5c833.web.app
 
-Currently, two official plugins are available:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+📌 Features
 
-## Expanding the ESLint configuration
+    ✅ Public Features
+    🔍 View all available medical camps
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+    📄 Detailed information for each camp
+
+    🔐 User registration/login (Email & Google)
+
+    👤 Participant Dashboard 
+    📊 Analytics overview
+
+    🧑‍💼 View & update profile
+
+    📅 View registered camps
+
+    💳 Payment history
+
+    🏥 Organizer Dashboard
+    👤 Manage profile & contact info
+
+    ➕ Add new camps
+
+    📋 Manage registered participants
+
+    💼 View payment & confirmation status
+
+    🛡️ Admin Dashboard
+    👨‍💼 Manage users (role-based)
+
+    🧾 Monitor all camps and registrations
+
+    ⚙️ Site-wide control access
+
+🧰 Tech Stack
+      Frontend:
+        ⚛️ React.js
+
+        🔐 Firebase Auth
+
+        📦 Axios & TanStack Query
+
+        🧮 React Hook Form
+
+        🎨 Tailwind CSS
+
+        📊 Recharts
+
+        🧭 React Router
+
+        🛠️ SweetAlert2, React Icons
+
+Backend
+    🌐 Node.js + Express.js
+
+    🛢️ MongoDB (with Mongoose)
+
+    🛡️ JWT Authentication
+
+    🔐 Role-based access control
+
+    🛡️ Authentication & Authorization
+    Firebase handles auth (email/password + Google).
+
+    JWT tokens for backend API protection.
+
+    Role-based rendering for admin, organizer, and participants.
+
+📈 Future Improvements
+    Email confirmation after registration
+
+    Payment gateway integration
+
+    Real-time updates using WebSockets
+
+🙋‍♂️ Developer
+Yeasin Forhad

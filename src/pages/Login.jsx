@@ -22,7 +22,7 @@ const Login = () => {
 
       // If exists, don't overwrite existing role (admin/user)
       const userInfo = {
-        name: user.displayName,
+        displayName: user.displayName,
         email: user.email,
         photoURL: user.photoURL,
         role: existingUser?.role || "user", // Preserve role if exists

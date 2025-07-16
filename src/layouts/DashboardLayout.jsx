@@ -4,6 +4,7 @@ import SideBar from "../pages/DashBoard/shared/SideBar";
 import Topbar from "../pages/DashBoard/shared/Topbar";
 import useRole from "../hooks/UseRole";
 import Loading from "../pages/Loading";
+import { Helmet } from "react-helmet-async";
 
 const DashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -13,6 +14,9 @@ const DashboardLayout = () => {
 
   return (
     <div className="flex h-screen bg-base-200 overflow-hidden">
+      <Helmet>
+        <title>Dashboard</title>
+      </Helmet>
       {/* Sidebar for desktop */}
       <div className="hidden md:block">
         <SideBar role={role} />

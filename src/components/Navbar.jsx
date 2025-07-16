@@ -7,7 +7,7 @@ import {
   FaSignOutAlt,
 } from "react-icons/fa";
 import { FiMenu, FiX } from "react-icons/fi";
-import { Link } from "react-router";
+import { Link, NavLink } from "react-router";
 import logo from "../assets/logo.png";
 import { MdDarkMode, MdLightMode } from "react-icons/md";
 import { AuthContext } from "../authentication/AuthContext";
@@ -61,18 +61,27 @@ const Navbar = () => {
         </div>
 
         <div className="hidden lg:flex gap-4 items-center">
-          <Link
+          <NavLink
             to="/"
-            className="btn btn-ghost text-base flex items-center gap-2"
+            className={({ isActive }) =>
+              `btn text-base flex items-center gap-2 ${
+                isActive ? "btn-primary" : "btn-ghost"
+              }`
+            }
           >
             <FaHome /> Home
-          </Link>
-          <Link
+          </NavLink>
+
+          <NavLink
             to="/available-camps"
-            className="btn btn-ghost text-base flex items-center gap-2"
+            className={({ isActive }) =>
+              `btn text-base flex items-center gap-2 ${
+                isActive ? "btn-primary" : "btn-ghost"
+              }`
+            }
           >
             <FaCampground /> Available Camps
-          </Link>
+          </NavLink>
 
           {!user ? (
             <Link
@@ -139,18 +148,28 @@ const Navbar = () => {
         {/* Mobile Menu */}
         {isMenuOpen && (
           <div className="absolute top-16 left-0 right-0 bg-base-100 z-20 flex flex-col items-center gap-2 p-4 shadow-md lg:hidden">
-            <Link
+            <NavLink
               to="/"
-              className="btn btn-ghost w-full flex justify-start gap-2"
+              className={({ isActive }) =>
+                `btn text-base flex items-center gap-2 ${
+                  isActive ? "btn-primary" : "btn-ghost"
+                }`
+              }
             >
               <FaHome /> Home
-            </Link>
-            <Link
+            </NavLink>
+
+            <NavLink
               to="/available-camps"
-              className="btn btn-ghost w-full flex justify-start gap-2"
+              className={({ isActive }) =>
+                `btn text-base flex items-center gap-2 ${
+                  isActive ? "btn-primary" : "btn-ghost"
+                }`
+              }
             >
               <FaCampground /> Available Camps
-            </Link>
+            </NavLink>
+
             {!user ? (
               <Link
                 to="/login"

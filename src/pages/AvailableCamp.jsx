@@ -4,6 +4,7 @@ import useAxiosSecure from "../hooks/useAxiosSecure";
 import { useState } from "react";
 import { HiViewGrid, HiViewList } from "react-icons/hi";
 import { Helmet } from "react-helmet-async";
+import Loading from "./Loading";
 
 const AvailableCamp = () => {
   const axiosSecure = useAxiosSecure();
@@ -39,7 +40,7 @@ const AvailableCamp = () => {
     return 0;
   });
 
-  if (isLoading) return <div className="text-center mt-10">Loading...</div>;
+  if (isLoading) return <div className="text-center mt-10"><Loading/></div>;
   if (isError)
     return (
       <div className="text-center mt-10 text-red-500">

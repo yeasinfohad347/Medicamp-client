@@ -4,6 +4,7 @@ import { useContext, useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import { AuthContext } from "../../../../authentication/AuthContext";
 import useAxiosSecure from "../../../../hooks/useAxiosSecure";
+import Loading from "../../../Loading";
 
 const PaymentForm = ({ registrationId }) => {
   const stripe = useStripe();
@@ -87,7 +88,7 @@ const PaymentForm = ({ registrationId }) => {
     setProcessing(false);
   };
 
-  if (!registration) return <p>Loading...</p>;
+  if (!registration) return <p><Loading/></p>;
 
   return (
     <form

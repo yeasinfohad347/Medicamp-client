@@ -11,6 +11,7 @@ import {
 } from "recharts";
 import { AuthContext } from "../../../authentication/AuthContext";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
+import Loading from "../../Loading";
 
 // Custom triangle shape
 const getPath = (x, y, width, height) => {
@@ -67,7 +68,7 @@ const ParticipantAnalytics = () => {
       </h2>
 
       {isLoading ? (
-        <p className="text-center">Loading chart...</p>
+        <p className="text-center"><Loading/></p>
       ) : chartData.length === 0 ? (
         <p className="text-center text-gray-500">No data found.</p>
       ) : (
