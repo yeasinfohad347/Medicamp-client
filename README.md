@@ -3,6 +3,14 @@ A full-stack MERN web application that simplifies the organization and participa
 
 🔗 Live URL: https://medi-camp-5c833.web.app
 
+## 👤 Organizer Test Credentials
+
+> You can use the following login details to test organizer features:
+
+- **Username (Email):** `yeasinforhad2@gmail.com`  
+- **Password:** `AsdFgh12`
+
+
 
 📌 Features
 
