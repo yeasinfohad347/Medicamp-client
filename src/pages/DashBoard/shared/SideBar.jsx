@@ -38,13 +38,13 @@ const SideBar = ({ role }) => {
             <NavLink to="/dashboard/user/analytics" className="btn btn-ghost justify-start">
               <FaChartBar /> Analytics
             </NavLink>
-            <NavLink to="/dashboard/profile" className="btn btn-ghost justify-start">
+            <NavLink to="/dashboard/user/profile" className="btn btn-ghost justify-start">
               <FaUser /> Participant Profile
             </NavLink>
-            <NavLink to="/dashboard/registered-camps" className="btn btn-ghost justify-start">
+            <NavLink to="/dashboard/user/manage-camps" className="btn btn-ghost justify-start">
               <FaCampground /> Registered Camps
             </NavLink>
-            <NavLink to="/dashboard/payment-history" className="btn btn-ghost justify-start">
+            <NavLink to="/dashboard/user/payment-history" className="btn btn-ghost justify-start">
               <FaMoneyCheckAlt /> Payment History
             </NavLink>
           </>

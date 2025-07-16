@@ -21,12 +21,20 @@ const Login = () => {
       email: user.email,
       photoURL: user.photoURL,
       role: "user", // default role
+      contact: "", // initially empty
     };
 
     try {
       await axiosSecure.put(`/users/${user.email}`, userInfo);
+
+      //  Now request JWT
+      const tokenRes = await axiosSecure.post("/jwt", { email: user.email });
+      const token = tokenRes.data.token;
+
+      //  Store it in localStorage
+      localStorage.setItem("access-token", token);
     } catch (err) {
-      console.error("Failed to save user to DB", err);
+      console.error("Failed to save user or fetch JWT:", err);
     }
   };
 
@@ -47,23 +55,31 @@ const Login = () => {
       });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const email = e.target.email.value;
     const password = e.target.password.value;
 
-    loginUser(email, password)
-      .then(() => {
-        Swal.fire({
-          title: "Welcome Back!",
-          text: "You successfully logged in!",
-          icon: "success",
-        });
-        navigate(location?.state?.from?.pathname || "/");
-      })
-      .catch(() => {
-        toast.error("Wrong email or password.");
+    try {
+      await loginUser(email, password);
+
+      // 🔐 Request JWT from backend
+      const res = await axiosSecure.post("/jwt", { email });
+
+      // ✅ Save token
+      localStorage.setItem("access-token", res.data.token);
+
+      Swal.fire({
+        title: "Welcome Back!",
+        text: "You successfully logged in!",
+        icon: "success",
       });
+
+      navigate(location?.state?.from?.pathname || "/");
+    } catch (err) {
+      toast.error("Wrong email or password.");
+      console.error(err);
+    }
   };
 
   return (

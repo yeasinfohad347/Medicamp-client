@@ -13,25 +13,32 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [imageName, setImageName] = useState("No file chosen");
 
-  const { creatUser, updateUser, signInWithGoogle, setUser } =
-    useContext(AuthContext);
-
+  const { creatUser, updateUser, signInWithGoogle, setUser } = useContext(AuthContext);
   const axiosSecure = useAxiosSecure();
 
   const saveUserToDB = async (user) => {
-    const userInfo = {
-      name: user.displayName,
-      email: user.email,
-      photoURL: user.photoURL,
-      role: "user", // default role
-    };
-
-    try {
-      await axiosSecure.put(`/users/${user.email}`, userInfo);
-    } catch (err) {
-      console.error("Failed to save user to DB:", err);
-    }
+  const userInfo = {
+    name: user.displayName,
+    email: user.email,
+    photoURL: user.photoURL,
+    role: "user", // default role
+    contact: ""   // initially empty
   };
+
+  try {
+    await axiosSecure.put(`/users/${user.email}`, userInfo);
+
+    // Now request JWT
+    const tokenRes = await axiosSecure.post("/jwt", { email: user.email });
+    const token = tokenRes.data.token;
+
+    // Store it in localStorage
+    localStorage.setItem("access-token", token);
+  } catch (err) {
+    console.error("Failed to save user or fetch JWT:", err);
+  }
+};
+
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -41,13 +48,9 @@ const Register = () => {
     const password = form.password.value;
     const image = form.image.files[0];
 
-    const regex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}$/;
-
-    if (!regex.test(password)) {
-      toast.error(
-        "Password must include:\n• One uppercase letter\n• One lowercase letter\n• Minimum 6 characters",
-        { autoClose: 5000 }
-      );
+    const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}$/;
+    if (!passwordRegex.test(password)) {
+      toast.error("Password must contain at least 1 uppercase, 1 lowercase, and 6+ characters.");
       return;
     }
 
@@ -55,10 +58,7 @@ const Register = () => {
       const result = await creatUser(email, password);
       const photoUrl = image ? URL.createObjectURL(image) : "";
 
-      await updateUser({
-        displayName: name,
-        photoURL: photoUrl,
-      });
+      await updateUser({ displayName: name, photoURL: photoUrl });
 
       const updatedUser = {
         ...result.user,
@@ -67,21 +67,22 @@ const Register = () => {
       };
 
       setUser(updatedUser);
-
-      // ✅ Save to DB
       await saveUserToDB(updatedUser);
+    
 
       Swal.fire({
-        title: "Congratulations!",
-        text: "You successfully registered!",
+        title: "Success!",
+        text: "Registration completed successfully.",
         icon: "success",
+        confirmButtonText: "OK",
       });
+
       navigate(location?.state?.from?.pathname || "/");
     } catch (err) {
       if (err.code === "auth/email-already-in-use") {
-        toast.error("This email is already registered.");
+        toast.error("Email is already registered.");
       } else {
-        toast.error("Registration failed: " + err.message);
+        toast.error("Registration failed. Try again.");
         console.error(err);
       }
     }
@@ -91,15 +92,13 @@ const Register = () => {
     signInWithGoogle()
       .then(async (result) => {
         const loggedUser = result.user;
-
-        // 🔐 Save user to DB
         await saveUserToDB(loggedUser);
 
-        toast.success("Logged in with Google!");
+        toast.success("Signed in with Google!");
         navigate(location?.state?.from?.pathname || "/");
       })
       .catch((err) => {
-        toast.error("Google Sign-In failed. Please try again.");
+        toast.error("Google sign-in failed.");
         console.error(err);
       });
   };
@@ -107,31 +106,17 @@ const Register = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-base-200 px-4">
       <div className="w-full max-w-lg bg-base-100 p-8 shadow-lg rounded-lg">
-        <h2 className="text-3xl font-bold text-center mb-6 text-primary">
-          Register for MediCamp
-        </h2>
+        <h2 className="text-3xl font-bold text-center mb-6 text-primary">Register for MediCamp</h2>
 
         <form onSubmit={handleRegister} className="space-y-4">
           <div>
             <label className="label font-medium">Full Name</label>
-            <input
-              type="text"
-              name="name"
-              required
-              placeholder="Your Name"
-              className="input input-bordered w-full"
-            />
+            <input type="text" name="name" required className="input input-bordered w-full" placeholder="John Doe" />
           </div>
 
           <div>
             <label className="label font-medium">Email</label>
-            <input
-              type="email"
-              name="email"
-              required
-              placeholder="example@email.com"
-              className="input input-bordered w-full"
-            />
+            <input type="email" name="email" required className="input input-bordered w-full" placeholder="your@email.com" />
           </div>
 
           <div>
@@ -141,13 +126,10 @@ const Register = () => {
                 type={showPassword ? "text" : "password"}
                 name="password"
                 required
-                placeholder="••••••••"
                 className="input input-bordered w-full pr-10"
+                placeholder="••••••••"
               />
-              <span
-                className="absolute top-3 right-3 cursor-pointer text-gray-500"
-                onClick={() => setShowPassword((prev) => !prev)}
-              >
+              <span className="absolute top-3 right-3 cursor-pointer text-gray-500" onClick={() => setShowPassword((prev) => !prev)}>
                 {showPassword ? <FaEyeSlash /> : <FaEye />}
               </span>
             </div>
@@ -160,17 +142,13 @@ const Register = () => {
               name="image"
               accept="image/*"
               required
-              onChange={(e) =>
-                setImageName(e.target.files[0]?.name || "No file chosen")
-              }
               className="file-input file-input-bordered w-full"
+              onChange={(e) => setImageName(e.target.files[0]?.name || "No file chosen")}
             />
             <span className="text-xs text-gray-500 mt-1">{imageName}</span>
           </div>
 
-          <button type="submit" className="btn btn-primary w-full">
-            Register
-          </button>
+          <button type="submit" className="btn btn-primary w-full">Register</button>
         </form>
 
         <div className="mt-4">
@@ -184,9 +162,7 @@ const Register = () => {
 
         <p className="mt-4 text-sm text-center">
           Already have an account?{" "}
-          <Link to="/login" className="text-primary hover:underline">
-            Login
-          </Link>
+          <Link to="/login" className="text-primary hover:underline">Login</Link>
         </p>
       </div>
     </div>

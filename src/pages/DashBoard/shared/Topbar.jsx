@@ -19,6 +19,7 @@ const Topbar = () => {
   const handleLogout = async () => {
     try {
       await logOut();
+      localStorage.removeItem("access-token");
     } catch (err) {
       console.error("Logout failed:", err);
     }

@@ -18,6 +18,11 @@ import ManageCamps from "../pages/DashBoard/Admin/ManageCamps";
 import UpdateCamp from "../pages/DashBoard/Admin/UpdateCamp";
 import ManageRegisteredCamps from "../pages/DashBoard/Admin/ManageRegistredCamp";
 import ParticipantAnalytics from "../pages/DashBoard/User/ParticipantAnalytics";
+import ParticipantProfile from "../pages/DashBoard/User/ParticipantProfile";
+import RegisteredCamps from "../pages/DashBoard/User/RegisteredCamps";
+import Payment from "../pages/DashBoard/User/payment/Payment";
+import PaymentHistory from "../pages/DashBoard/User/PaymentHistory";
+import ErrorPage from "../pages/ErrorPage";
 
 export const router = createBrowserRouter([
   {
@@ -61,33 +66,64 @@ export const router = createBrowserRouter([
       },
       {
         path: "admin-profile",
-        element: <OrganizerProfile />,
+        element: (
+          <AdminRoute>
+            <OrganizerProfile />
+          </AdminRoute>
+        ),
       },
       {
         path: "admin/add-camp",
-        element: <AddCamp />,
+        element: (
+          <AdminRoute>
+            <AddCamp />
+          </AdminRoute>
+        ),
       },
       {
         path: "admin/manage-camps",
-        element: <ManageCamps />,
+        element: (
+          <AdminRoute>
+            <ManageCamps />
+          </AdminRoute>
+        ),
       },
       {
         path: "admin/update-camp/:campId",
         element: (
-          <PrivateRoute>
+          <AdminRoute>
             <UpdateCamp />
-          </PrivateRoute>
+          </AdminRoute>
         ),
       },
       {
-         path: "admin/manage-registered",
-       element: <ManageRegisteredCamps />,
+        path: "admin/manage-registered",
+        element: (
+          <AdminRoute>
+            <ManageRegisteredCamps />
+          </AdminRoute>
+        ),
       },
       {
         path: "user/analytics",
         element: <ParticipantAnalytics />,
       },
-      
+      {
+        path: "user/profile",
+        element: <ParticipantProfile />,
+      },
+      {
+        path: "user/manage-camps",
+        element: <RegisteredCamps />,
+      },
+      {
+        path: "user/payment/:id",
+        element: <Payment />,
+      },
+      {
+        path: "user/payment-history",
+        element: <PaymentHistory />,
+      },
 
       // {
       //   path: "admin/add-camp",
@@ -121,4 +157,8 @@ export const router = createBrowserRouter([
       // },
     ],
   },
+  {
+    path:"*",
+    element:<ErrorPage/>
+  }
 ]);

@@ -12,7 +12,6 @@ import logo from "../assets/logo.png";
 import { MdDarkMode, MdLightMode } from "react-icons/md";
 import { AuthContext } from "../authentication/AuthContext";
 
-
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -32,6 +31,7 @@ const Navbar = () => {
   const handleLogout = async () => {
     try {
       await logOut();
+      localStorage.removeItem("access-token");
       setIsDropdownOpen(false);
     } catch (err) {
       console.error("Logout failed:", err);
@@ -49,15 +49,24 @@ const Navbar = () => {
         </div>
 
         <div className="hidden lg:flex gap-4 items-center">
-          <Link to="/" className="btn btn-ghost text-base flex items-center gap-2">
+          <Link
+            to="/"
+            className="btn btn-ghost text-base flex items-center gap-2"
+          >
             <FaHome /> Home
           </Link>
-          <Link to="/available-camps" className="btn btn-ghost text-base flex items-center gap-2">
+          <Link
+            to="/available-camps"
+            className="btn btn-ghost text-base flex items-center gap-2"
+          >
             <FaCampground /> Available Camps
           </Link>
 
           {!user ? (
-            <Link to="/login" className="btn btn-primary btn-sm flex items-center gap-2">
+            <Link
+              to="/login"
+              className="btn btn-primary btn-sm flex items-center gap-2"
+            >
               <FaSignInAlt /> Join Us
             </Link>
           ) : (
@@ -96,7 +105,11 @@ const Navbar = () => {
             onClick={toggleTheme}
             title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
           >
-            {theme === "light" ? <MdDarkMode size={20} /> : <MdLightMode size={20} />}
+            {theme === "light" ? (
+              <MdDarkMode size={20} />
+            ) : (
+              <MdLightMode size={20} />
+            )}
           </button>
         </div>
 
@@ -112,23 +125,40 @@ const Navbar = () => {
         {/* Mobile Menu */}
         {isMenuOpen && (
           <div className="absolute top-16 left-0 right-0 bg-base-100 z-20 flex flex-col items-center gap-2 p-4 shadow-md lg:hidden">
-            <Link to="/" className="btn btn-ghost w-full flex justify-start gap-2">
+            <Link
+              to="/"
+              className="btn btn-ghost w-full flex justify-start gap-2"
+            >
               <FaHome /> Home
             </Link>
-            <Link to="/available-camps" className="btn btn-ghost w-full flex justify-start gap-2">
+            <Link
+              to="/available-camps"
+              className="btn btn-ghost w-full flex justify-start gap-2"
+            >
               <FaCampground /> Available Camps
             </Link>
             {!user ? (
-              <Link to="/login" className="btn btn-primary w-full flex justify-start gap-2">
+              <Link
+                to="/login"
+                className="btn btn-primary w-full flex justify-start gap-2"
+              >
                 <FaSignInAlt /> Join Us
               </Link>
             ) : (
               <>
-                <span className="text-lg font-semibold">{user.displayName}</span>
-                <Link to="/dashboard" className="btn btn-ghost w-full flex justify-start gap-2">
+                <span className="text-lg font-semibold">
+                  {user.displayName}
+                </span>
+                <Link
+                  to="/dashboard"
+                  className="btn btn-ghost w-full flex justify-start gap-2"
+                >
                   <FaTachometerAlt /> Dashboard
                 </Link>
-                <button onClick={handleLogout} className="btn btn-ghost w-full flex justify-start gap-2">
+                <button
+                  onClick={handleLogout}
+                  className="btn btn-ghost w-full flex justify-start gap-2"
+                >
                   <FaSignOutAlt /> Logout
                 </button>
               </>
