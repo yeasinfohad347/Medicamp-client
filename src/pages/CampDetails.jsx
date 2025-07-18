@@ -2,11 +2,12 @@ import { useContext, useState } from "react";
 import { useParams } from "react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
-import { toast } from "react-toastify";
+
 
 import useAxiosSecure from "../hooks/useAxiosSecure";
 import { AuthContext } from "../authentication/AuthContext";
 import Loading from "./Loading";
+import Swal from "sweetalert2";
 
 const CampDetails = () => {
   const { id } = useParams();
@@ -43,30 +44,41 @@ const CampDetails = () => {
 
   // Submit handler for Join Camp form
   const onSubmit = async (data) => {
-    const participantData = {
-      campId: camp._id,
-      campName: camp.name,
-      campFee: camp.fee,
-      location: camp.location,
-      healthcareProfessional: camp.healthcareProfessional,
-      participantName: user.displayName,
-      participantEmail: user.email,
-      paymentStatus: "unpaid", 
-      confirmationStatus: "pending", 
-      ...data,
-    };
-
-    try {
-      await axiosSecure.post("/participants", participantData);
-      await axiosSecure.patch(`/camps/increment/${camp._id}`);
-      toast.success("Successfully joined the camp!");
-      setShowModal(false);
-      reset();
-      queryClient.invalidateQueries(["campDetails", id]);
-    } catch (error) {
-      toast.error("Failed to join. Please try again.");
-    }
+  const participantData = {
+    campId: camp._id,
+    campName: camp.name,
+    campFee: camp.fee,
+    location: camp.location,
+    healthcareProfessional: camp.healthcareProfessional,
+    participantName: user.displayName,
+    participantEmail: user.email,
+    paymentStatus: "unpaid",
+    confirmationStatus: "pending",
+    ...data,
   };
+  try {
+    await axiosSecure.post("/participants", participantData);
+    await axiosSecure.patch(`/camps/increment/${camp._id}`);
+
+    Swal.fire({
+      icon: "success",
+      title: "Joined Successfully!",
+      text: `You have successfully joined the camp: ${camp.name}`,
+    });
+
+    setShowModal(false);
+    reset();
+    queryClient.invalidateQueries(["campDetails", id]);
+  } catch (error) {
+    
+    Swal.fire({
+      icon: "error",
+      title: "Join Failed",
+      text: "Something went wrong. Please try again.",
+    });
+  }
+};
+
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
