@@ -87,7 +87,7 @@ const UpdateCamp = () => {
             <input
               type="number"
               step="0.01"
-              {...register("fees", { required: true })}
+              {...register("fee", { required: true })}
               className="input input-bordered w-full"
             />
             {errors.fees && <span className="text-red-500">Fees required</span>}
