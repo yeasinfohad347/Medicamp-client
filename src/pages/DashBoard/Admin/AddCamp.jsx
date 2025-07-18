@@ -1,6 +1,5 @@
 import { useForm } from "react-hook-form";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
-import { toast } from "react-toastify";
 import { useNavigate } from "react-router";
 import Swal from "sweetalert2";
 import { useContext } from "react";
@@ -23,7 +22,7 @@ const AddCamp = () => {
       const newCamp = {
         name: data.name,
         image: data.image,
-        fees: parseFloat(data.fees),
+        fee: parseFloat(data.fees),
         date: data.date,
         time: data.time,
         location: data.location,
@@ -36,7 +35,7 @@ const AddCamp = () => {
       const res = await axiosSecure.post("/camps", newCamp);
 
       if (res.data.insertedId) {
-        // ✅ SweetAlert instead of toast
+       
         Swal.fire({
           icon: "success",
           title: "Camp Added!",

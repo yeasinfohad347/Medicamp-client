@@ -42,7 +42,7 @@ const RegisteredCamps = () => {
     });
 
     if (confirm.isConfirmed) {
-      const res = await axiosSecure.delete(`/registrations/${id}`);
+      const res = await axiosSecure.delete(`/participant/cancel/${id}`);
       if (res.data.deleteResult.deletedCount > 0) {
         Swal.fire(
           "Canceled!",
