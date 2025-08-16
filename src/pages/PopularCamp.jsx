@@ -33,7 +33,7 @@ const PopularCamp = () => {
 
   return (
     <motion.section
-      className="max-w-7xl mx-auto px-4 my-12"
+      className="max-w-7xl mx-auto px-4 my-12" id="popular-camp"
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}

@@ -1,10 +1,12 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useContext } from "react";
 import {
   FaHome,
   FaCampground,
   FaSignInAlt,
   FaTachometerAlt,
   FaSignOutAlt,
+  FaUserCircle,
+  FaInfoCircle,
 } from "react-icons/fa";
 import { FiMenu, FiX } from "react-icons/fi";
 import { Link, NavLink } from "react-router";
@@ -17,19 +19,9 @@ import useAxiosSecure from "../hooks/useAxiosSecure";
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
 
   const { user, logOut } = useContext(AuthContext);
   const axiosSecure = useAxiosSecure();
-
-  useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
-    localStorage.setItem("theme", theme);
-  }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
-  };
 
   const handleLogout = async () => {
     try {
@@ -51,8 +43,9 @@ const Navbar = () => {
   });
 
   return (
-    <div className="pt-5">
-      <div className="navbar shadow-md px-4 lg:px-8 max-w-7xl rounded-2xl mx-auto border-b-2 border-blue-600">
+    <div className="sticky top-0 z-50 bg-base-100 shadow-md">
+      <div className="px-4 lg:px-8 max-w-7xl mx-auto flex items-center justify-between h-16">
+        {/* Logo */}
         <div className="flex-1">
           <Link to="/" className="text-xl font-bold flex items-center gap-2">
             <img src={logo} alt="logo" className="w-8 h-8" />
@@ -60,7 +53,8 @@ const Navbar = () => {
           </Link>
         </div>
 
-        <div className="hidden lg:flex gap-4 items-center">
+        {/* Desktop Menu */}
+        <div className="hidden lg:flex items-center gap-4">
           <NavLink
             to="/"
             className={({ isActive }) =>
@@ -83,14 +77,43 @@ const Navbar = () => {
             <FaCampground /> Available Camps
           </NavLink>
 
-          {!user ? (
-            <Link
-              to="/login"
-              className="btn btn-primary btn-sm flex items-center gap-2"
+          <NavLink
+            to="/about-us"
+            className={({ isActive }) =>
+              `btn text-base flex items-center gap-2 ${
+                isActive ? "btn-primary" : "btn-ghost"
+              }`
+            }
+          >
+            <FaInfoCircle /> About Us
+          </NavLink>
+
+          {/* Dashboard button */}
+          {user && (
+            <NavLink
+              to="/dashboard"
+              className={({ isActive }) =>
+                `btn text-base flex items-center gap-2 ${
+                  isActive ? "btn-primary" : "btn-ghost"
+                }`
+              }
             >
-              <FaSignInAlt /> Join Us
-            </Link>
-          ) : (
+              <FaTachometerAlt /> Dashboard
+            </NavLink>
+          )}
+
+          {/* Logout button */}
+          {user && (
+            <button
+              onClick={handleLogout}
+              className="btn btn-ghost flex items-center gap-2"
+            >
+              <FaSignOutAlt /> Logout
+            </button>
+          )}
+
+          {/* Profile avatar */}
+          {user && (
             <div className="dropdown dropdown-end relative">
               <button
                 className="btn btn-ghost btn-circle avatar"
@@ -106,36 +129,37 @@ const Navbar = () => {
                   <li className="text-center font-semibold">
                     {isLoading
                       ? "Loading..."
-                      : dbUser?.name || user?.displayName || "Admin User"}
+                      : dbUser?.name || user?.displayName || "User"}
                   </li>
-                  <li>
-                    <Link to="/dashboard">
-                      <FaTachometerAlt /> Dashboard
-                    </Link>
-                  </li>
-                  <li>
-                    <button onClick={handleLogout}>
-                      <FaSignOutAlt /> Logout
-                    </button>
-                  </li>
+                  
                 </ul>
               )}
             </div>
           )}
 
-          <button
-            className="btn btn-sm btn-ghost rounded-full"
-            onClick={toggleTheme}
-            title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
-          >
-            {theme === "light" ? (
-              <MdDarkMode size={20} />
-            ) : (
-              <MdLightMode size={20} />
-            )}
-          </button>
+          {/* Join/Login button for guests */}
+          {!user && (
+            <Link
+              to="/login"
+              className="btn btn-primary btn-sm flex items-center gap-2"
+            >
+              <FaSignInAlt /> Join Us
+            </Link>
+          )}
+
+          {/* Theme Toggle */}
+          <label className="flex items-center gap-2 cursor-pointer">
+            <MdLightMode />
+            <input
+              type="checkbox"
+              value="dark"
+              className="toggle theme-controller"
+            />
+            <MdDarkMode />
+          </label>
         </div>
 
+        {/* Mobile Menu Button */}
         <div className="lg:hidden">
           <button
             className="btn btn-ghost"
@@ -170,26 +194,41 @@ const Navbar = () => {
               <FaCampground /> Available Camps
             </NavLink>
 
-            {!user ? (
-              <Link
-                to="/login"
-                className="btn btn-primary w-full flex justify-start gap-2"
-              >
-                <FaSignInAlt /> Join Us
-              </Link>
-            ) : (
+            <NavLink
+              to="/about-us"
+              className={({ isActive }) =>
+                `btn text-base flex items-center gap-2 ${
+                  isActive ? "btn-primary" : "btn-ghost"
+                }`
+              }
+            >
+              <FaInfoCircle /> About Us
+            </NavLink>
+
+            {user && (
               <>
-                <span className="text-lg font-semibold">
-                  {isLoading
-                    ? "Loading..."
-                    : dbUser?.name || user?.displayName || "Admin User"}
-                </span>
-                <Link
+                <NavLink
                   to="/dashboard"
-                  className="btn btn-ghost w-full flex justify-start gap-2"
+                  className={({ isActive }) =>
+                    `btn text-base flex items-center gap-2 ${
+                      isActive ? "btn-primary" : "btn-ghost"
+                    } w-full`
+                  }
                 >
                   <FaTachometerAlt /> Dashboard
-                </Link>
+                </NavLink>
+
+                <NavLink
+                  to="/profile"
+                  className={({ isActive }) =>
+                    `btn text-base flex items-center gap-2 ${
+                      isActive ? "btn-primary" : "btn-ghost"
+                    } w-full`
+                  }
+                >
+                  Profile
+                </NavLink>
+
                 <button
                   onClick={handleLogout}
                   className="btn btn-ghost w-full flex justify-start gap-2"
@@ -198,6 +237,26 @@ const Navbar = () => {
                 </button>
               </>
             )}
+
+            {!user && (
+              <Link
+                to="/login"
+                className="btn btn-primary w-full flex justify-start gap-2"
+              >
+                <FaSignInAlt /> Join Us
+              </Link>
+            )}
+
+            {/* Theme Toggle (Mobile) */}
+            <label className="flex items-center gap-2 cursor-pointer mt-2">
+              <MdLightMode />
+              <input
+                type="checkbox"
+                value="dark"
+                className="toggle theme-controller"
+              />
+              <MdDarkMode />
+            </label>
           </div>
         )}
       </div>

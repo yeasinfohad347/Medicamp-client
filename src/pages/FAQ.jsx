@@ -41,8 +41,8 @@ const FAQ = () => {
   };
 
   return (
-    <section className="bg-base-200 py-12 px-4 md:px-8">
-      <div className="max-w-4xl mx-auto">
+    <section className=" py-12 px-4 md:px-8">
+      <div className="max-w-6xl mx-auto">
         <h2 className="text-3xl md:text-4xl font-bold text-center mb-10 text-primary">
           Frequently Asked Questions
         </h2>

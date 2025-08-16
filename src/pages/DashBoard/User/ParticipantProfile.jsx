@@ -28,7 +28,7 @@ const  ParticipantProfile = () => {
       return res.data;
     },
   });
-  console.log(dbUser);
+  
 
   useEffect(() => {
     if (dbUser) {
@@ -48,7 +48,7 @@ const  ParticipantProfile = () => {
       contact: data.contact,
       bio: data.bio,
     };
-    console.log(updatedUser);
+    
 
     try {
       const res = await axiosSecure.put(`/users/${user.email}`, {

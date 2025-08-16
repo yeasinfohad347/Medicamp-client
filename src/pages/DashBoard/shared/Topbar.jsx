@@ -1,5 +1,6 @@
-import { useContext, useEffect, useState } from "react";
-import { FaMoon, FaSun, FaSignOutAlt, FaBars } from "react-icons/fa";
+import { useContext } from "react";
+import { FaSignOutAlt, FaBars } from "react-icons/fa";
+import { MdDarkMode, MdLightMode } from "react-icons/md";
 import { useQuery } from "@tanstack/react-query";
 import { AuthContext } from "../../../authentication/AuthContext";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
@@ -7,17 +8,6 @@ import useAxiosSecure from "../../../hooks/useAxiosSecure";
 const Topbar = ({ onToggleSidebar }) => {
   const { user, logOut } = useContext(AuthContext);
   const axiosSecure = useAxiosSecure();
-
-  const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
-
-  useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
-    localStorage.setItem("theme", theme);
-  }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === "light" ? "dark" : "light"));
-  };
 
   const handleLogout = async () => {
     try {
@@ -28,7 +18,6 @@ const Topbar = ({ onToggleSidebar }) => {
     }
   };
 
-  
   const { data: dbUser = {}, isLoading } = useQuery({
     queryKey: ["dbUser", user?.email],
     enabled: !!user?.email,
@@ -58,14 +47,16 @@ const Topbar = ({ onToggleSidebar }) => {
 
       {/* Actions */}
       <div className="flex items-center gap-4">
-        {/* Theme Toggle */}
-        <button
-          onClick={toggleTheme}
-          className="btn btn-sm btn-ghost"
-          title="Toggle Theme"
-        >
-          {theme === "light" ? <FaMoon /> : <FaSun />}
-        </button>
+        {/* 🌙 Theme Toggle using DaisyUI */}
+        <label className="flex items-center gap-2 cursor-pointer">
+          <MdLightMode />
+          <input
+            type="checkbox"
+            value="dark"
+            className="toggle theme-controller"
+          />
+          <MdDarkMode />
+        </label>
 
         {/* User Avatar Dropdown */}
         <div className="dropdown dropdown-end">

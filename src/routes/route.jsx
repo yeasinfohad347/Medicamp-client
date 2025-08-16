@@ -23,6 +23,7 @@ import RegisteredCamps from "../pages/DashBoard/User/RegisteredCamps";
 import Payment from "../pages/DashBoard/User/payment/Payment";
 import PaymentHistory from "../pages/DashBoard/User/PaymentHistory";
 import ErrorPage from "../pages/ErrorPage";
+import AboutUs from "../pages/AboutUs";
 
 export const router = createBrowserRouter([
   {
@@ -50,6 +51,10 @@ export const router = createBrowserRouter([
         path: "/register",
         element: <Register />,
       },
+      {
+        path:"/about-us",
+        element:<AboutUs/>
+      }
     ],
   },
   {
