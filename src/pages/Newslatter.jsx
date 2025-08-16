@@ -1,17 +1,17 @@
-// import React, { useState } from "react";
-// import { FaPaperPlane } from "react-icons/fa";
+import React, { useState } from "react";
+import { FaPaperPlane } from "react-icons/fa";
 
-// const Newsletter = () => {
-//   const [email, setEmail] = useState("");
-//   const [submitted, setSubmitted] = useState(false);
+const Newsletter = () => {
+  const [email, setEmail] = useState("");
+  const [submitted, setSubmitted] = useState(false);
 
-//   const handleSubmit = (e) => {
-//     e.preventDefault();
-//     // TODO: Send email to backend or email service
-//     console.log("Subscribed email:", email);
-//     setSubmitted(true);
-//     setEmail("");
-//   };
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // TODO: Send email to backend or email service
+    console.log("Subscribed email:", email);
+    setSubmitted(true);
+    setEmail("");
+  };
 
 //   return (
 //     <section className="bg-primary/20 py-16 px-4 md:px-8 text-center">
